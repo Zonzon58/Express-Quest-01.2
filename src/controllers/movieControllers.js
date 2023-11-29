@@ -1,4 +1,4 @@
-const database = require("../../database"); /*Ne pas oublier d'importer database.js */
+const database = require("../../database");
 
 const movies = [
   {
@@ -27,28 +27,9 @@ const movies = [
   },
 ];
 
-/*const getMovies = (req, res) => {
-  res.json(movies);
-};*/
-
-/*const getMovieById = (req, res) => {
-  const id = parseInt(req.params.id);
-
-  const movie = movies.find((movie) => movie.id === id);
-
-  if (movie != null) {
-    res.json(movie);
-  } else {
-    res.status(404).send("Not Found");
-  }
-};*/
-
-/*ICI ON CREE LES REQUETES A LA BASE DE DONNEES ET ON LES EXPORTE */
-
 const getMovies = (req, res) => {
-  /*Requête qui communique avec ma base de données express_quests.sql*/
   database
-    .query("select * from movies") /*Je fais la requête SQL par ce '.query' */
+    .query("select * from movies")
     .then(([movies]) => {
       res.json(movies);
     })
@@ -62,32 +43,13 @@ const getMovieById = (req, res) => {
   const id = parseInt(req.params.id);
 
   database
-    .query("select * from movies where id = ?", [
-      id,
-    ]) /*Je fais la requête SQL par ce '.query', les variables sont remplacées par un '?' et en second paramètre un tableau avec les valeurs à injecter*/
+    .query("select * from movies where id = ?", [id])
     .then(([movies]) => {
       if (movies[0] != null) {
         res.json(movies[0]);
       } else {
         res.sendStatus(404);
       }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
-    });
-};
-
-const postMovies = (req, res) => {
-  const { title, director, year, color, duration } = req.body;
-
-  database
-    .query(
-      "INSERT INTO movies(title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
-      [title, director, year, color, duration]
-    )
-    .then(([result]) => {
-      res.status(201).send({ id: result.insertId });
     })
     .catch((err) => {
       console.error(err);
@@ -125,13 +87,29 @@ const getUserById = (req, res) => {
     });
 };
 
+const postMovies = (req, res) => {
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(
+      "INSERT INTO movies(title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
+      [title, director, year, color, duration]
+    )
+    .then(([result]) => {
+      res.status(201).send({ id: result.insertId });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+};
+
 const postUsers = (req, res) => {
   const { firstname, lastname, email, city, language } = req.body;
 
   database
     .query(
-      "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
-      [firstname, lastname, email, city, language]
+           [firstname, lastname, email, city, language]
     )
     .then(([result]) => {
       res.status(201).send({ id: result.insertId });
@@ -147,4 +125,6 @@ module.exports = {
   getMovieById,
   getUsers,
   getUserById,
+  postMovies,
+  postUsers,
 };

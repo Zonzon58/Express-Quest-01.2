@@ -1,11 +1,7 @@
 const request = require("supertest");
+const crypto = require("node:crypto");
 
 const app = require("../src/app");
-
-const database = require("../database")
-
-afterAll(() => database.end());
-
 
 describe("GET /api/users", () => {
   it("should return all users", async () => {
@@ -30,5 +26,96 @@ describe("GET /api/users/:id", () => {
     const response = await request(app).get("/api/users/0");
 
     expect(response.status).toEqual(404);
+  });
+});
+
+describe("POST /api/users", () => {
+  it("should return created user", async () => {
+    const newUser = {
+      firstname: "Marie",
+      lastname: "Martin",
+      email: `${crypto.randomUUID()}@wild.co`,
+      city: "Paris",
+      language: "French",
+    };
+
+    const response = await request(app).post("/api/users").send(newUser);
+
+    expect(response.status).toEqual(201);
+    expect(response.body).toHaveProperty("id");
+    expect(typeof response.body.id).toBe("number");
+
+    const getResponse = await request(app).get(
+      `/api/users/${response.body.id}`
+    );
+
+    expect(getResponse.headers["content-type"]).toMatch(/json/);
+    expect(getResponse.status).toEqual(200);
+
+    expect(getResponse.body).toHaveProperty("id");
+
+    expect(getResponse.body).toHaveProperty("firstname");
+    expect(getResponse.body.firstname).toStrictEqual(newUser.firstname);
+
+    expect(getResponse.body).toHaveProperty("lastname");
+    expect(getResponse.body.lastname).toStrictEqual(newUser.lastname);
+
+    expect(getResponse.body).toHaveProperty("email");
+    expect(getResponse.body.email).toStrictEqual(newUser.email);
+
+    expect(getResponse.body).toHaveProperty("city");
+    expect(getResponse.body.city).toEqual(newUser.city);
+
+    expect(getResponse.body).toHaveProperty("language");
+    expect(getResponse.body.language).toStrictEqual(newUser.language);
+  });
+
+  it("should return an error", async () => {
+    const movieWithMissingProps = { firstname: "Harry" };
+
+    const response = await request(app)
+      .post("/api/users")
+      .send(movieWithMissingProps);
+
+    expect(response.status).toEqual(422);
+  });
+  it("should return an error", async () => {
+    const userWithMissingProps = { lastname: "Potter" };
+
+    const response = await request(app)
+      .post("/api/users")
+      .send(userWithMissingProps);
+
+    expect(response.status).toEqual(422);
+  });
+
+  it("should return an error", async () => {
+    const userWithMissingProps = { email: "harry@potter.com" };
+
+    const response = await request(app)
+      .post("/api/users")
+      .send(userWithMissingProps);
+
+    expect(response.status).toEqual(422);
+  });
+
+  it("should return an error", async () => {
+    const userWithMissingProps = { city: "Paris" };
+
+    const response = await request(app)
+      .post("/api/users")
+      .send(userWithMissingProps);
+
+    expect(response.status).toEqual(422);
+  });
+
+  it("should return an error", async () => {
+    const userWithMissingProps = { language: "French" };
+
+    const response = await request(app)
+      .post("/api/users")
+      .send(userWithMissingProps);
+
+    expect(response.status).toEqual(422);
   });
 });
