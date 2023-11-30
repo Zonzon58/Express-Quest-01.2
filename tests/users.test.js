@@ -1,24 +1,50 @@
-USERTEST
-[10:45]
 const request = require("supertest");
-const crypto = require("node:crypto");
 
 const app = require("../src/app");
 
 const database = require("../database");
 
+const crypto = require("node:crypto");
+
 afterAll(() => database.end());
+
+describe("GET /api/users", () => {
+  it("should return all users", async () => {
+    const response = await request(app).get("/api/users");
+
+    expect(response.headers["content-type"]).toMatch(/json/);
+
+    expect(response.status).toEqual(200);
+  });
+});
+
+describe("GET /api/user/:id", () => {
+  it("should return one users", async () => {
+    const response = await request(app).get("/api/user/1");
+
+    expect(response.headers["content-type"]).toMatch(/json/);
+
+    expect(response.status).toEqual(200);
+  });
+
+  it("should return no user", async () => {
+    const response = await request(app).get("/api/user/0");
+
+    expect(response.status).toEqual(404);
+  });
+});
 
 describe("POST /api/users", () => {
   it("should return created user", async () => {
     const newUser = {
       firstname: "Marie",
       lastname: "Martin",
-      email: ${crypto.randomUUID()}@wild.co,
+      email: '${crypto.ramdomUUID()}@wild.co', 
       city: "Paris",
       language: "French",
     };
-    const response = await request(app).post("/api/users").send(newuser);
+
+    const response = await request(app).post("/api/users").send(newUser);
 
     expect(response.headers["content-type"]).toMatch(/json/);
     expect(response.status).toEqual(201);
@@ -35,7 +61,7 @@ describe("POST /api/users", () => {
     expect(userInDatabase).toHaveProperty("id");
 
     expect(userInDatabase).toHaveProperty("lastname");
-    expect(userInDatabase.lastname).toStrictEqual(newuser.lastname);
+    expect(userInDatabase.lastname).toStrictEqual(newUser.lastname);
   });
   it("should return an error", async () => {
     const userWithMissingProps = { lastname: "Harry" };
@@ -45,21 +71,5 @@ describe("POST /api/users", () => {
       .send(userWithMissingProps);
 
     expect(response.status).toEqual(500);
-  });
-});
-
-describe("GET /api/users/:id", () => {
-  it("should return one user", async () => {
-    const response = await request(app).get("/api/users/1");
-
-    expect(response.headers["content-type"]).toMatch(/json/);
-
-    expect(response.status).toEqual(200);
-  });
-
-  it("should return no user", async () => {
-    const response = await request(app).get("/api/users/0");
-
-    expect(response.status).toEqual(404);
   });
 });

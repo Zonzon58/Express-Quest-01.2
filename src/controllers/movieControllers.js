@@ -91,10 +91,7 @@ const postMovies = (req, res) => {
   const { title, director, year, color, duration } = req.body;
 
   database
-    .query(
-      "INSERT INTO movies(title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
-      [title, director, year, color, duration]
-    )
+    .query(["Les Larmes du Soleil", "Antoine Fuqua", "2003", "color", "121"])
     .then(([result]) => {
       res.status(201).send({ id: result.insertId });
     })
@@ -108,11 +105,47 @@ const postUsers = (req, res) => {
   const { firstname, lastname, email, city, language } = req.body;
 
   database
-    .query(
-           [firstname, lastname, email, city, language]
-    )
+    .query([firstname, lastname, email, city, language])
     .then(([result]) => {
       res.status(201).send({ id: result.insertId });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+};
+
+const updateMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(["Les Larmes du Soleil", "Antoine Fuqua", "2003", "color", "121", "8"])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+};
+
+const updateUsers = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(["Les Larmes du Soleil", "Antoine Fuqua", "2003", "color", "121", "8"])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(204);
+      }
     })
     .catch((err) => {
       console.error(err);
@@ -123,8 +156,10 @@ const postUsers = (req, res) => {
 module.exports = {
   getMovies,
   getMovieById,
-  getUsers,
-  getUserById,
   postMovies,
+  getUserById,
+  getUsers,
   postUsers,
+  updateMovie,
+  updateUsers,
 };
